@@ -1,0 +1,17 @@
+model Staff {
+  id            String      @id @default(uuid())
+  name          String
+  serviceType   String      // E.g., Doctor, Consultant, Support Agent
+  dailyCapacity Int         @default(5)
+  status        StaffStatus @default(AVAILABLE)
+
+  accountId     String
+  account       Account     @relation(fields: [accountId], references: [id])
+
+  appointments  Appointment[]
+}
+
+enum StaffStatus {
+  AVAILABLE
+  ON_LEAVE
+}

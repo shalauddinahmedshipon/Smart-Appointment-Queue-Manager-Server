@@ -1,0 +1,9 @@
+model ActivityLog {
+  id        String   @id @default(uuid())
+  message   String   // e.g., "Appointment for John Doe assigned to Riya"
+
+  accountId String
+  account   Account  @relation(fields: [accountId], references: [id])
+
+  createdAt DateTime @default(now())
+}

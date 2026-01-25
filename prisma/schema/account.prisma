@@ -1,0 +1,18 @@
+// --------------------
+// Account = Organization + Admin User
+// --------------------
+model Account {
+  id               String        @id @default(uuid())
+  email            String        @unique
+  password         String
+  organizationName String
+  organizationLogo String?       // URL from Cloudinary
+
+  createdAt        DateTime      @default(now())
+
+  staff            Staff[]
+  services         Service[]
+  appointments     Appointment[]
+  activityLogs     ActivityLog[]
+}
+

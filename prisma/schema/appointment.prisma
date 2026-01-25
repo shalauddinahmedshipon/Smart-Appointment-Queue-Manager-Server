@@ -1,0 +1,29 @@
+enum AppointmentStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+model Appointment {
+  id            String            @id @default(uuid())
+  customerName  String
+
+  date          DateTime          // Appointment date
+  startTime     DateTime
+  endTime       DateTime
+
+  status        AppointmentStatus @default(SCHEDULED)
+  isQueued      Boolean           @default(false)  // True if waiting in queue
+
+  accountId     String
+  account       Account           @relation(fields: [accountId], references: [id])
+
+  staffId       String?
+  staff         Staff?            @relation(fields: [staffId], references: [id])
+
+  serviceId     String
+  service       Service           @relation(fields: [serviceId], references: [id])
+
+  createdAt     DateTime          @default(now())
+}
