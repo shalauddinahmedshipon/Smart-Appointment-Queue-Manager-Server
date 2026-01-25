@@ -35,7 +35,7 @@ export class AppointmentController {
   @Get(':id')
   async findOne(@Req() req: Request, @Param('id') id: string) {
     const accountId = req.user!.id;
-    return this.appointmentService.findAll(accountId); // can update for single appointment
+    return this.appointmentService.findOne(accountId,id); // can update for single appointment
   }
 
   @Patch(':id')

@@ -10,12 +10,13 @@ import { StaffModule } from './module/staff/staff.module';
 import { ServiceModule } from './module/service/service.module';
 import { AppointmentModule } from './module/appointment/appointment.module';
 import { ActivityLogModule } from './module/activity-log/activity-log.module';
-
+import { ScheduleModule } from '@nestjs/schedule';
 
 
 
 @Module({
   imports: [
+     ScheduleModule.forRoot(),
     MailerModule.forRoot({
       transport: {
         service: 'gmail',

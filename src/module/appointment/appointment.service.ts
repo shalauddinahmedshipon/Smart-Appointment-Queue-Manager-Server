@@ -185,33 +185,53 @@ export class AppointmentService {
     });
   }
 
-  async assignFromQueue(accountId: string) {
-    const queue = await this.getWaitingQueue(accountId);
+async assignFromQueue(accountId: string) {
+  const queue = await this.getWaitingQueue(accountId);
 
-    for (const appointment of queue) {
-      const service = await this.prisma.service.findUnique({
-        where: { id: appointment.serviceId },
-      });
-      const staffId = await this.autoAssignStaff(
-        accountId,
-        service,
-        appointment.appointmentAt,
-      );
+  let assigned = 0;
+  let skipped = 0;
 
-      if (staffId) {
-        const updated = await this.prisma.appointment.update({
-          where: { id: appointment.id },
-          data: { staffId },
-          include: { staff: true },
-        });
+  for (const appointment of queue) {
+    const service = await this.prisma.service.findUnique({
+      where: { id: appointment.serviceId },
+    });
 
-        await this.createActivityLog(
-          accountId,
-          `Appointment for "${updated.customerName}" moved from waiting queue to ${updated.staff!.name}`,
-        );
-      }
+    const staffId = await this.autoAssignStaff(
+      accountId,
+      service,
+      appointment.appointmentAt,
+    );
+
+    if (!staffId) {
+      skipped++;
+      continue;
     }
+
+    const updated = await this.prisma.appointment.update({
+      where: { id: appointment.id },
+      data: { staffId },
+      include: { staff: true },
+    });
+
+    await this.createActivityLog(
+      accountId,
+      `Appointment for "${updated.customerName}" auto-assigned to ${updated.staff!.name}`,
+    );
+
+    assigned++;
   }
+
+  return {
+    processed: queue.length,
+    assigned,
+    skipped,
+    message:
+      assigned > 0
+        ? `${assigned} appointment(s) assigned`
+        : 'No appointments could be assigned',
+  };
+}
+
 
   // ---------------- CONFLICT CHECK ----------------
   async checkStaffConflict(
