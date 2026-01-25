@@ -8,6 +8,8 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { CloudinaryModule } from './common/cloudinary/cloudinary.module';
 import { StaffModule } from './module/staff/staff.module';
 import { ServiceModule } from './module/service/service.module';
+import { AppointmentModule } from './module/appointment/appointment.module';
+import { ActivityLogModule } from './module/activity-log/activity-log.module';
 
 
 
@@ -31,7 +33,9 @@ import { ServiceModule } from './module/service/service.module';
     AuthModule,
     CloudinaryModule,
     StaffModule,
-    ServiceModule
+    ServiceModule,
+    AppointmentModule,
+    ActivityLogModule
   ],
   controllers: [AppController],
   providers: [AppService],
