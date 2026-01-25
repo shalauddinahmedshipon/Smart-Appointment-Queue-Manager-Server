@@ -1,14 +1,12 @@
 model Staff {
-  id            String      @id @default(uuid())
+  id            String        @id @default(uuid())
   name          String
-  serviceType   String      // E.g., Doctor, Consultant, Support Agent
-  dailyCapacity Int         @default(5)
-  status        StaffStatus @default(AVAILABLE)
-
+  serviceType   String
+  dailyCapacity Int           @default(5)
+  status        StaffStatus   @default(AVAILABLE)
   accountId     String
-  account       Account     @relation(fields: [accountId], references: [id])
-
   appointments  Appointment[]
+  account       Account       @relation(fields: [accountId], references: [id])
 }
 
 enum StaffStatus {

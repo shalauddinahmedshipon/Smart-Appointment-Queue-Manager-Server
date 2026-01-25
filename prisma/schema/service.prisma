@@ -1,13 +1,11 @@
 model Service {
-  id                String   @id @default(uuid())
+  id                String          @id @default(uuid())
   name              String
+  accountId         String
   duration          ServiceDuration
   requiredStaffType StaffType
-
-  accountId         String
-  account           Account  @relation(fields: [accountId], references: [id])
-
   appointments      Appointment[]
+  account           Account         @relation(fields: [accountId], references: [id])
 
-   @@unique([accountId, name], map: "unique_service_per_account")
+  @@unique([accountId, name], map: "unique_service_per_account")
 }
