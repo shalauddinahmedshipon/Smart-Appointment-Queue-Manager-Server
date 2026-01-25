@@ -1,8 +1,8 @@
 model Service {
   id                String   @id @default(uuid())
   name              String
-  duration          Int      // 15 / 30 / 60 minutes
-  requiredStaffType String
+  duration          ServiceDuration
+  requiredStaffType StaffType
 
   accountId         String
   account           Account  @relation(fields: [accountId], references: [id])

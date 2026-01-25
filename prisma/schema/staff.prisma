@@ -15,3 +15,15 @@ enum StaffStatus {
   AVAILABLE
   ON_LEAVE
 }
+
+enum StaffType {
+  DOCTOR
+  CONSULTANT
+  SUPPORT_AGENT
+}
+
+enum ServiceDuration {
+  MIN_15
+  MIN_30
+  MIN_60
+}
