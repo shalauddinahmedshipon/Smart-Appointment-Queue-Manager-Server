@@ -5,10 +5,10 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
-  "scripts": {
-    "build": "nest build",
+ "scripts": {
+    "build": "prisma migrate deploy && prisma generate && nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "prisma migrate deploy && prisma generate && nest start",
+    "start": "node --max-old-space-size=1024 dist/main.js",
     "dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
