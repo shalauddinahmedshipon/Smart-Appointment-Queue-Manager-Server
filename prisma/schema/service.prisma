@@ -8,4 +8,6 @@ model Service {
   account           Account  @relation(fields: [accountId], references: [id])
 
   appointments      Appointment[]
+
+   @@unique([accountId, name], map: "unique_service_per_account")
 }

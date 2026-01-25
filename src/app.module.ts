@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { CloudinaryModule } from './common/cloudinary/cloudinary.module';
 import { StaffModule } from './module/staff/staff.module';
+import { ServiceModule } from './module/service/service.module';
 
 
 
@@ -29,7 +30,8 @@ import { StaffModule } from './module/staff/staff.module';
     PrismaModule,
     AuthModule,
     CloudinaryModule,
-    StaffModule
+    StaffModule,
+    ServiceModule
   ],
   controllers: [AppController],
   providers: [AppService],
