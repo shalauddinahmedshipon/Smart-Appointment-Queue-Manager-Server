@@ -103,43 +103,52 @@ export class AppointmentService {
   }
 
   // ---------------- UPDATE ----------------
-  async update(accountId: string, id: string, dto: UpdateAppointmentDto) {
-    const appointment = await this.prisma.appointment.findFirstOrThrow({
-      where: { id, accountId },
-      include: { staff: true, service: true },
-    });
+async update(accountId: string, id: string, dto: UpdateAppointmentDto) {
+  const appointment = await this.prisma.appointment.findFirstOrThrow({
+    where: { id, accountId },
+    include: { staff: true, service: true },
+  });
 
-    // Conflict check if staff or time changes
-    if ((dto.staffId && dto.staffId !== appointment.staffId) || dto.appointmentAt) {
-      const service = appointment.service;
-      const staffId = dto.staffId || appointment.staffId;
-      if (staffId) {
-        const conflict = await this.checkStaffConflict(
-          staffId,
-          new Date(dto.appointmentAt || appointment.appointmentAt),
-          this.durationInMinutes(service.duration),
+  // Check if staffId or appointmentAt actually changed
+  const staffChanged = dto.staffId && dto.staffId !== appointment.staffId;
+  const timeChanged = dto.appointmentAt && 
+    new Date(dto.appointmentAt).getTime() !== new Date(appointment.appointmentAt).getTime();
+
+  // Only check conflicts if staff or time actually changed
+  if (staffChanged || timeChanged) {
+    const service = appointment.service;
+    const staffId = dto.staffId || appointment.staffId;
+    
+    if (staffId) {
+      const conflict = await this.checkStaffConflict(
+        staffId,
+        new Date(dto.appointmentAt || appointment.appointmentAt),
+        this.durationInMinutes(service.duration),
+        id, // ⚠️ IMPORTANT: Exclude current appointment from conflict check
+      );
+      
+      if (conflict) {
+        throw new BadRequestException(
+          'Staff has a conflicting appointment at this time',
         );
-        if (conflict)
-          throw new BadRequestException(
-            'Staff has a conflicting appointment at this time',
-          );
       }
     }
-
-    const updated = await this.prisma.appointment.update({
-      where: { id },
-      data: { ...dto },
-      include: { staff: true },
-    });
-
-    await this.createActivityLog(
-      accountId,
-      `Appointment for "${updated.customerName}" updated` +
-        (updated.staff ? `, assigned to ${updated.staff.name}` : ''),
-    );
-
-    return updated;
   }
+
+  const updated = await this.prisma.appointment.update({
+    where: { id },
+    data: { ...dto },
+    include: { staff: true },
+  });
+
+  await this.createActivityLog(
+    accountId,
+    `Appointment for "${updated.customerName}" updated` +
+      (updated.staff ? `, assigned to ${updated.staff.name}` : ''),
+  );
+
+  return updated;
+}
 
   // ---------------- DELETE ----------------
   async remove(accountId: string, id: string) {
@@ -235,28 +244,28 @@ async assignFromQueue(accountId: string) {
 
   // ---------------- CONFLICT CHECK ----------------
   async checkStaffConflict(
-    staffId: string,
-    appointmentAt: Date,
-    durationMinutes: number,
-  ) {
-    const newStart = appointmentAt;
-    const newEnd = addMinutes(newStart, durationMinutes);
+  staffId: string, 
+  appointmentAt: Date, 
+  durationMinutes: number,
+  excludeAppointmentId?: string // Add this parameter
+) {
+  const startTime = appointmentAt;
+  const endTime = new Date(appointmentAt.getTime() + durationMinutes * 60000);
 
-    const conflict = await this.prisma.appointment.findFirst({
-      where: { staffId, status: AppointmentStatus.SCHEDULED },
-      include: { service: true },
-    });
+  const conflict = await this.prisma.appointment.findFirst({
+    where: {
+      staffId,
+      status: 'SCHEDULED',
+      id: excludeAppointmentId ? { not: excludeAppointmentId } : undefined, // Exclude current appointment
+      appointmentAt: {
+        gte: new Date(startTime.getTime() - 60 * 60000), // 1 hour before
+        lt: endTime,
+      },
+    },
+  });
 
-    if (!conflict) return false;
-
-    const existingStart = conflict.appointmentAt;
-    const existingEnd = addMinutes(
-      existingStart,
-      this.durationInMinutes(conflict.service.duration as ServiceDuration),
-    );
-
-    return isBefore(newStart, existingEnd) && isAfter(newEnd, existingStart);
-  }
+  return !!conflict;
+}
 
   // ---------------- AUTO-ASSIGN STAFF ----------------
   async autoAssignStaff(accountId: string, service: any, appointmentAt: Date) {
