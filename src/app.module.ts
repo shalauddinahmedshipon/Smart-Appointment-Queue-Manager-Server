@@ -11,6 +11,7 @@ import { ServiceModule } from './module/service/service.module';
 import { AppointmentModule } from './module/appointment/appointment.module';
 import { ActivityLogModule } from './module/activity-log/activity-log.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { DashboardModule } from './module/dashboard/dashboard.module';
 
 
 
@@ -36,7 +37,8 @@ import { ScheduleModule } from '@nestjs/schedule';
     StaffModule,
     ServiceModule,
     AppointmentModule,
-    ActivityLogModule
+    ActivityLogModule,
+    DashboardModule
   ],
   controllers: [AppController],
   providers: [AppService],
