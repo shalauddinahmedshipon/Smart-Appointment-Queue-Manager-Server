@@ -8,8 +8,8 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto'
-import { ChangePasswordDto } from './dto/change-password.dto';
 import { getTokens} from './auth.utils';
+import { UpdateAccountDto } from './dto/change-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -97,34 +97,54 @@ export class AuthService {
   }
 
   // ---------------- CHANGE PASSWORD ----------------
-  async changePassword(email: string, dto: ChangePasswordDto) {
-    const account = await this.prisma.account.findUnique({
-      where: { email },
-    });
+async updateAccount(
+  accountId: string,
+  dto: UpdateAccountDto,
+  organizationLogo?: string,
+) {
+  const account = await this.prisma.account.findUnique({
+    where: { id: accountId },
+  });
 
-    if (!account) {
-      throw new NotFoundException('Account not found');
+  if (!account) throw new NotFoundException('Account not found');
+
+  const updateData: any = {};
+
+  // Update organization info
+  if (dto.organizationName) updateData.organizationName = dto.organizationName;
+  if (organizationLogo) updateData.organizationLogo = organizationLogo;
+
+  // Update password if provided
+  if (dto.oldPassword || dto.newPassword || dto.confirmPassword) {
+    if (!dto.oldPassword || !dto.newPassword || !dto.confirmPassword) {
+      throw new BadRequestException('All password fields must be provided');
     }
 
     const isMatch = await bcrypt.compare(dto.oldPassword, account.password);
-    if (!isMatch) {
-      throw new BadRequestException('Old password is incorrect');
-    }
+    if (!isMatch) throw new BadRequestException('Old password is incorrect');
 
     if (dto.newPassword !== dto.confirmPassword) {
       throw new BadRequestException("Passwords don't match");
     }
 
-    const hashed = await bcrypt.hash(
-      dto.newPassword,
-      parseInt(process.env.SALT_ROUND!),
-    );
-
-    await this.prisma.account.update({
-      where: { email },
-      data: { password: hashed },
-    });
-
-    return { message: 'Password changed successfully' };
+    const hashed = await bcrypt.hash(dto.newPassword, parseInt(process.env.SALT_ROUND!));
+    updateData.password = hashed;
   }
+
+  const updated = await this.prisma.account.update({
+    where: { id: accountId },
+    data: updateData,
+  });
+
+  return {
+    message: 'Account updated successfully',
+    account: {
+      id: updated.id,
+      email: updated.email,
+      organizationName: updated.organizationName,
+      organizationLogo: updated.organizationLogo,
+    },
+  };
+}
+
 }

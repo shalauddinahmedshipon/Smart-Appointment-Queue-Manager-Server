@@ -1,27 +1,26 @@
-// src/user/dto/change-password.dto.ts
-import { IsString, MinLength, Matches } from 'class-validator';
+// src/user/dto/update-account.dto.ts
+import { IsOptional, IsString, MinLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class ChangePasswordDto {
-  @ApiProperty({
-    example: 'oldPassword123',
-    description: 'Your current password',
-  })
-  @IsString({ message: 'Old password must be a string.' })
-  oldPassword: string;
+export class UpdateAccountDto {
+  @ApiProperty({ example: 'newOrgName', description: 'Organization name', required: false })
+  @IsOptional()
+  @IsString()
+  organizationName?: string;
 
-  @ApiProperty({
-    example: 'newSecurePass456',
-    description: 'Your new password (minimum 6 characters)',
-  })
-  @IsString({ message: 'New password must be a string.' })
-  @MinLength(6, { message: 'New password must be at least 6 characters long.' })
-  newPassword: string;
+  @ApiProperty({ example: 'oldPassword123', description: 'Current password', required: false })
+  @IsOptional()
+  @IsString()
+  oldPassword?: string;
 
-  @ApiProperty({
-    example: 'newSecurePass456',
-    description: 'Repeat the new password to confirm',
-  })
-  @IsString({ message: 'Confirm password must be a string.' })
-  confirmPassword: string;
+  @ApiProperty({ example: 'newPassword123', description: 'New password', required: false })
+  @IsOptional()
+  @IsString()
+  @MinLength(6)
+  newPassword?: string;
+
+  @ApiProperty({ example: 'newPassword123', description: 'Confirm new password', required: false })
+  @IsOptional()
+  @IsString()
+  confirmPassword?: string;
 }
