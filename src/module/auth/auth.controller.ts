@@ -28,72 +28,121 @@ export class AuthController {
     private cloudinary: CloudinaryService,
   ) {}
 
-  // ---------------- SIGN UP ----------------
+  // // ---------------- SIGN UP ----------------
+  // @Public()
+  // @Post('signup')
+  // @ApiOperation({ summary: 'Create account (organization admin)' })
+  // @ApiConsumes('multipart/form-data')
+  // @ApiBody({ type: SignupDto })
+  // @UseInterceptors(FileInterceptor('organizationLogo'))
+  // async signup(
+  //   @Body() body: any,
+  //   @UploadedFile() file: Express.Multer.File,
+  //   @Res({ passthrough: true }) res: Response,
+  // ) {
+  //   const logoUrl = file
+  //     ? await this.cloudinary.uploadImage(file, 'organization')
+  //     : null;
+
+  //   const { account, accessToken } = await this.authService.signup({
+  //     ...body,
+  //     organizationLogo: logoUrl,
+  //   });
+
+  //   res.cookie('access_token', accessToken, {
+  //     httpOnly: true,
+  //     secure: process.env.NODE_ENV === 'production',   // false locally, true on prod
+  //     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  //     maxAge: 7 * 24 * 60 * 60 * 1000,
+  //     path: '/',
+  //   });
+
+  //   return sendResponse(res, {
+  //     statusCode: HttpStatus.CREATED,
+  //     success: true,
+  //     message: 'Account created successfully',
+  //     data:account,
+  //   });
+  // }
+
   @Public()
-  @Post('signup')
-  @ApiOperation({ summary: 'Create account (organization admin)' })
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({ type: SignupDto })
-  @UseInterceptors(FileInterceptor('organizationLogo'))
-  async signup(
-    @Body() body: any,
-    @UploadedFile() file: Express.Multer.File,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    const logoUrl = file
-      ? await this.cloudinary.uploadImage(file, 'organization')
-      : null;
+@Post('login')
+async login(
+  @Body() dto: LoginDto,
+  @Res() res: Response,
+) {
+  const { account, accessToken } = await this.authService.login(dto);
 
-    const { account, accessToken } = await this.authService.signup({
-      ...body,
-      organizationLogo: logoUrl,
-    });
+  return sendResponse(res, {
+    statusCode: HttpStatus.OK,
+    success: true,
+    message: 'Login successful',
+    data: {
+      account,
+      accessToken, // 🔥 TOKEN IN BODY
+    },
+  });
+}
 
-    res.cookie('access_token', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',   // false locally, true on prod
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: '/',
-    });
 
-    return sendResponse(res, {
-      statusCode: HttpStatus.CREATED,
-      success: true,
-      message: 'Account created successfully',
-      data:account,
-    });
-  }
+@Public()
+@Post('signup')
+@UseInterceptors(FileInterceptor('organizationLogo'))
+async signup(
+  @Body() body: any,
+  @UploadedFile() file: Express.Multer.File,
+  @Res() res: Response,
+) {
+  const logoUrl = file
+    ? await this.cloudinary.uploadImage(file, 'organization')
+    : null;
 
-  // ---------------- LOGIN ----------------
-  @Public()
-  @Post('login')
-  async login(
-    @Body() dto: LoginDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    const { account, accessToken } = await this.authService.login(dto);
+  const { account, accessToken } = await this.authService.signup({
+    ...body,
+    organizationLogo: logoUrl,
+  });
 
-    res.cookie('access_token', accessToken, {
-      httpOnly: true,
-      secure:true,
-      sameSite: 'none',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: '/',
-    });
+  return sendResponse(res, {
+    statusCode: HttpStatus.CREATED,
+    success: true,
+    message: 'Account created successfully',
+    data: {
+      account,
+      accessToken, // 🔥 TOKEN IN BODY
+    },
+  });
+}
 
-    return sendResponse(res, {
-      statusCode: HttpStatus.OK,
-      success: true,
-      message: 'Login successful',
-      data: account,
-    });
-  }
+
+  // // ---------------- LOGIN ----------------
+  // @Public()
+  // @Post('login')
+  // async login(
+  //   @Body() dto: LoginDto,
+  //   @Res({ passthrough: true }) res: Response,
+  // ) {
+  //   const { account, accessToken } = await this.authService.login(dto);
+
+  //   res.cookie('access_token', accessToken, {
+  //     httpOnly: true,
+  //     secure:true,
+  //     sameSite: 'none',
+  //     maxAge: 7 * 24 * 60 * 60 * 1000,
+  //     path: '/',
+  //   });
+
+  //   return sendResponse(res, {
+  //     statusCode: HttpStatus.OK,
+  //     success: true,
+  //     message: 'Login successful',
+  //     data: account,
+  //   });
+  // }
 
   // ---------------- LOGOUT ----------------
   @Post('logout')
   logout(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie('access_token', { path: '/' });
+    // res.clearCookie('access_token', { path: '/' });
 
     return sendResponse(res, {
       statusCode: HttpStatus.OK,
