@@ -16,7 +16,7 @@ Live Demo
   https://lucid.app/lucidchart/4511713b-ffd1-4377-9353-d8f07f013156/edit?invitationId=inv_0c89aa63-c211-4ec2-ad0b-ed2aed6d6fce
 
 - **ERD Screenshot:**  
-  ![Smart Appointment Queue Manager ERD](https://res.cloudinary.com/drxigac9l/image/upload/v1769615387/organization/ccw2mwjj8du7lmsfhk91.png)
+  ![Smart Appointment Queue Manager ERD](https://res.cloudinary.com/drxigac9l/image/upload/v1770030729/Blank_diagram_xenpwk.png)
 
 ## Features
 
