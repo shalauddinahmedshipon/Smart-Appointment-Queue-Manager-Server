@@ -13,7 +13,7 @@ async function bootstrap() {
     bodyParser: true,
   });
   app.enableCors({
-    origin: ['http://localhost:3000','https://smart-appointment-queue-manager-cli.vercel.app'],
+    origin: ['http://localhost:3000','http://localhost:3001','https://smart-appointment-queue-manager-cli.vercel.app'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   });
 
